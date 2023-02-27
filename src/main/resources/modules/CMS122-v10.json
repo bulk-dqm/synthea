@@ -88,7 +88,6 @@
     "IPP_Qualifying_Encounter": {
       "type": "Encounter",
       "telemedicine_possibility": "none",
-      "direct_transition": "Set_IPP",
       "name": "IPP_Qualifying_Encounter",
       "codes": [
         {
@@ -128,23 +127,19 @@
           "value_set": ""
         }
       ],
-      "encounter_class": "inpatient"
+      "encounter_class": "inpatient",
+      "distributed_transition": [
+        {
+          "transition": "Record_HbA1c",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Set_HbA1c_Not_Performed",
+          "distribution": 0.25
+        }
+      ]
     },
-    "Set_IPP": {
-      "type": "SetAttribute",
-      "attribute": "ecqm_ipp",
-      "direct_transition": "Set_Denominator",
-      "value": true,
-      "name": "Set_IPP"
-    },
-    "Set_Denominator": {
-      "type": "SetAttribute",
-      "attribute": "ecqm_denominator",
-      "value": true,
-      "direct_transition": "Record_HbA1C",
-      "name": "Set_Denominator"
-    },
-    "Record_HbA1C": {
+    "Record_HbA1c": {
       "type": "Observation",
       "vital_sign": "Blood Glucose",
       "category": "laboratory",
@@ -169,8 +164,59 @@
         }
       ],
       "unit": "%",
+      "name": "Record_HbA1c",
+      "conditional_transition": [
+        {
+          "transition": "Set_Numerator",
+          "condition": {
+            "condition_type": "Or",
+            "conditions": [
+              {
+                "condition_type": "Attribute",
+                "attribute": "Blood Glucose",
+                "operator": ">=",
+                "value": 9
+              },
+              {
+                "condition_type": "Attribute",
+                "attribute": "Blood Glucose",
+                "operator": "is nil"
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Set_Denominator"
+        }
+      ]
+    },
+    "Set_HbA1c_Not_Performed": {
+      "type": "SetAttribute",
+      "attribute": "HbA1c_not_performed",
+      "direct_transition": "Set_Numerator",
+      "name": "Set_HbA1c_Not_Performed",
+      "value": true
+    },
+    "Set_Numerator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_numerator",
+      "direct_transition": "Set_Denominator",
+      "value": true,
+      "name": "Set_Numerator"
+    },
+    "Set_Denominator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_denominator",
+      "direct_transition": "Set_IPP",
+      "value": true,
+      "name": "Set_Denominator"
+    },
+    "Set_IPP": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_ipp",
       "direct_transition": "Terminal",
-      "name": "Record_HA1C"
+      "value": true,
+      "name": "Set_IPP"
     }
   },
   "gmf_version": 2
