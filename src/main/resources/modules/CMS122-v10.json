@@ -88,7 +88,7 @@
     "IPP_Qualifying_Encounter": {
       "type": "Encounter",
       "telemedicine_possibility": "none",
-      "direct_transition": "Terminal",
+      "direct_transition": "Set_IPP",
       "name": "IPP_Qualifying_Encounter",
       "codes": [
         {
@@ -129,6 +129,48 @@
         }
       ],
       "encounter_class": "inpatient"
+    },
+    "Set_IPP": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_ipp",
+      "direct_transition": "Set_Denominator",
+      "value": true,
+      "name": "Set_IPP"
+    },
+    "Set_Denominator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_denominator",
+      "value": true,
+      "direct_transition": "Record_HbA1C",
+      "name": "Set_Denominator"
+    },
+    "Record_HbA1C": {
+      "type": "Observation",
+      "vital_sign": "Blood Glucose",
+      "category": "laboratory",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+          "value_set": ""
+        },
+        {
+          "system": "LOINC",
+          "code": "17856-6",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC",
+          "value_set": ""
+        },
+        {
+          "system": "LOINC",
+          "code": "4549-2",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood by Electrophoresis",
+          "value_set": ""
+        }
+      ],
+      "unit": "%",
+      "direct_transition": "Terminal",
+      "name": "Record_HA1C"
     }
   },
   "gmf_version": 2
