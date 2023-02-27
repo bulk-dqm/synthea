@@ -1,0 +1,135 @@
+{
+  "name": "CMS122-v10.json",
+  "remarks": [
+    "Module based on CMS122v10 - Hemoglobin A1c Poor Control (>9%)"
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Set_Measurement_Period_Start",
+      "name": "Initial"
+    },
+    "Terminal": {
+      "type": "Terminal",
+      "name": "Terminal"
+    },
+    "IPP_Age_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "And",
+        "conditions": [
+          {
+            "condition_type": "Age",
+            "operator": ">=",
+            "quantity": 18,
+            "unit": "years",
+            "value": 0
+          },
+          {
+            "condition_type": "Age",
+            "operator": "<=",
+            "quantity": 75,
+            "unit": "years",
+            "value": 0
+          }
+        ]
+      },
+      "direct_transition": "Measurement_Period_Guard",
+      "name": "IPP_Age_Guard"
+    },
+    "Set_Measurement_Period_Start": {
+      "type": "SetAttribute",
+      "attribute": "Start of Measurement Period",
+      "direct_transition": "Set_Measurement_Period_End",
+      "name": "Set_Measurement_Period_Start",
+      "value": "2019-01-01T00:00:00Z"
+    },
+    "Set_Measurement_Period_End": {
+      "type": "SetAttribute",
+      "attribute": "End of Measurement Period",
+      "direct_transition": "IPP_Age_Guard",
+      "name": "Set_Measurement_Period_End",
+      "value": "2019-12-31T00:00:00Z"
+    },
+    "Measurement_Period_Guard": {
+      "type": "Guard",
+      "remarks": [
+        "Enforce measurement period"
+      ],
+      "allow": {
+        "condition_type": "Date",
+        "operator": ">=",
+        "attribute": "Start of Measurement Period"
+      },
+      "direct_transition": "Diagnose_Diabetes",
+      "name": "Measurement_Period_Guard"
+    },
+    "Diagnose_Diabetes": {
+      "type": "ConditionOnset",
+      "condition_type": "Active Condition",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "44054006",
+          "display": "Diabetes Type 2",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": "46635009",
+          "display": "Diabetes Type 1",
+          "value_set": ""
+        }
+      ],
+      "assign_to_attribute": "has_diabetes",
+      "direct_transition": "IPP_Qualifying_Encounter",
+      "name": "Diagnose_Diabetes"
+    },
+    "IPP_Qualifying_Encounter": {
+      "type": "Encounter",
+      "telemedicine_possibility": "none",
+      "direct_transition": "Terminal",
+      "name": "IPP_Qualifying_Encounter",
+      "codes": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "185464004",
+          "display": "Out of hours visit - not night visit (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "444971000124105",
+          "display": "Annual wellness visit (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99397",
+          "display": "",
+          "value_set": ""
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99387",
+          "display": "",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "704126008",
+          "display": "Home visit for anticoagulant drug monitoring (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "386472008",
+          "display": "Telephone consultation (procedure)",
+          "value_set": ""
+        }
+      ],
+      "encounter_class": "inpatient"
+    }
+  },
+  "gmf_version": 2
+}
