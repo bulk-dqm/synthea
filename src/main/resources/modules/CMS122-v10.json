@@ -123,13 +123,13 @@
         {
           "system": "http://www.ama-assn.org/go/cpt",
           "code": "99397",
-          "display": "",
+          "display": "Preventive Care Services - Established Office Visit, 18 and Up",
           "value_set": ""
         },
         {
           "system": "http://www.ama-assn.org/go/cpt",
           "code": "99387",
-          "display": "",
+          "display": "Preventive Care Services-Initial Office Visit, 18 and Up",
           "value_set": ""
         },
         {
