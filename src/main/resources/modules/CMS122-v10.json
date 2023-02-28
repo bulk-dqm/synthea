@@ -61,7 +61,16 @@
         "operator": ">=",
         "attribute": "Start of Measurement Period"
       },
-      "direct_transition": "Diagnose_Diabetes",
+      "distributed_transition": [
+        {
+          "transition": "Diagnose_Diabetes",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ],
       "name": "Measurement_Period_Guard"
     },
     "Diagnose_Diabetes": {
@@ -82,7 +91,16 @@
         }
       ],
       "assign_to_attribute": "has_diabetes",
-      "direct_transition": "IPP_Qualifying_Encounter",
+      "distributed_transition": [
+        {
+          "transition": "IPP_Qualifying_Encounter",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ],
       "name": "Diagnose_Diabetes"
     },
     "IPP_Qualifying_Encounter": {
@@ -128,16 +146,7 @@
         }
       ],
       "encounter_class": "inpatient",
-      "distributed_transition": [
-        {
-          "transition": "Record_HbA1c",
-          "distribution": 0.75
-        },
-        {
-          "transition": "Set_HbA1c_Not_Performed",
-          "distribution": 0.25
-        }
-      ]
+      "direct_transition": "Set_Encounter_Occurred"
     },
     "Record_HbA1c": {
       "type": "Observation",
@@ -165,35 +174,12 @@
       ],
       "unit": "%",
       "name": "Record_HbA1c",
-      "conditional_transition": [
-        {
-          "transition": "Set_Numerator",
-          "condition": {
-            "condition_type": "Or",
-            "conditions": [
-              {
-                "condition_type": "Attribute",
-                "attribute": "Blood Glucose",
-                "operator": ">=",
-                "value": 9
-              },
-              {
-                "condition_type": "Attribute",
-                "attribute": "Blood Glucose",
-                "operator": "is nil"
-              }
-            ]
-          }
-        },
-        {
-          "transition": "Set_Denominator"
-        }
-      ]
+      "direct_transition": "Check_Population"
     },
     "Set_HbA1c_Not_Performed": {
       "type": "SetAttribute",
       "attribute": "HbA1c_not_performed",
-      "direct_transition": "Set_Numerator",
+      "direct_transition": "Check_Population",
       "name": "Set_HbA1c_Not_Performed",
       "value": true
     },
@@ -217,6 +203,92 @@
       "direct_transition": "Terminal",
       "value": true,
       "name": "Set_IPP"
+    },
+    "Check_Population": {
+      "type": "Simple",
+      "name": "Check_Population",
+      "conditional_transition": [
+        {
+          "transition": "Set_Numerator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "And",
+                "conditions": [
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "has_diabetes",
+                    "operator": "==",
+                    "value": true
+                  },
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "encounter_occurred",
+                    "operator": "==",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "condition_type": "Or",
+                "conditions": [
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "Blood Glucose",
+                    "operator": ">=",
+                    "value": 9
+                  },
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "Blood Glucose",
+                    "operator": "is nil"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Set_Denominator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Attribute",
+                "attribute": "has_diabetes",
+                "operator": "==",
+                "value": true
+              },
+              {
+                "condition_type": "Attribute",
+                "attribute": "encounter_occurred",
+                "operator": "==",
+                "value": true
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Set_Encounter_Occurred": {
+      "type": "SetAttribute",
+      "attribute": "encounter_occurred",
+      "distributed_transition": [
+        {
+          "transition": "Record_HbA1c",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Set_HbA1c_Not_Performed",
+          "distribution": 0.25
+        }
+      ],
+      "name": "Set_Encounter_Occurred",
+      "value": true
     }
   },
   "gmf_version": 2
