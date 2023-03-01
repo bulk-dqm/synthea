@@ -210,15 +210,16 @@
                 "condition_type": "Or",
                 "conditions": [
                   {
-                    "condition_type": "Attribute",
-                    "attribute": "Blood Glucose",
+                    "condition_type": "Vital Sign",
+                    "vital_sign": "Blood Glucose",
                     "operator": ">=",
                     "value": 9
                   },
                   {
                     "condition_type": "Attribute",
-                    "attribute": "Blood Glucose",
-                    "operator": "is nil"
+                    "attribute": "HbA1c_not_performed",
+                    "operator": "==",
+                    "value": true
                   }
                 ]
               }
