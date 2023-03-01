@@ -6,8 +6,8 @@
   "states": {
     "Initial": {
       "type": "Initial",
-      "direct_transition": "Set_Measurement_Period_Start",
-      "name": "Initial"
+      "name": "Initial",
+      "direct_transition": "IPP_Age_Guard"
     },
     "Terminal": {
       "type": "Terminal",
@@ -37,20 +37,6 @@
       "direct_transition": "Measurement_Period_Guard",
       "name": "IPP_Age_Guard"
     },
-    "Set_Measurement_Period_Start": {
-      "type": "SetAttribute",
-      "attribute": "Start of Measurement Period",
-      "direct_transition": "Set_Measurement_Period_End",
-      "name": "Set_Measurement_Period_Start",
-      "value": "2019-01-01T00:00:00Z"
-    },
-    "Set_Measurement_Period_End": {
-      "type": "SetAttribute",
-      "attribute": "End of Measurement Period",
-      "direct_transition": "IPP_Age_Guard",
-      "name": "Set_Measurement_Period_End",
-      "value": "2019-12-31T00:00:00Z"
-    },
     "Measurement_Period_Guard": {
       "type": "Guard",
       "remarks": [
@@ -59,7 +45,7 @@
       "allow": {
         "condition_type": "Date",
         "operator": ">=",
-        "attribute": "Start of Measurement Period"
+        "year": 2019
       },
       "distributed_transition": [
         {
@@ -90,18 +76,8 @@
           "value_set": ""
         }
       ],
-      "assign_to_attribute": "has_diabetes",
-      "distributed_transition": [
-        {
-          "transition": "IPP_Qualifying_Encounter",
-          "distribution": 0.75
-        },
-        {
-          "transition": "Check_Population",
-          "distribution": 0.25
-        }
-      ],
-      "name": "Diagnose_Diabetes"
+      "name": "Diagnose_Diabetes",
+      "direct_transition": "Set_Has_Diabetes"
     },
     "IPP_Qualifying_Encounter": {
       "type": "Encounter",
@@ -288,6 +264,22 @@
         }
       ],
       "name": "Set_Encounter_Occurred",
+      "value": true
+    },
+    "Set_Has_Diabetes": {
+      "type": "SetAttribute",
+      "attribute": "has_diabetes",
+      "distributed_transition": [
+        {
+          "transition": "IPP_Qualifying_Encounter",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ],
+      "name": "Set_Has_Diabetes",
       "value": true
     }
   },
