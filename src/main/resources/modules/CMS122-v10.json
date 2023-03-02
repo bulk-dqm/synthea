@@ -1,0 +1,288 @@
+{
+  "name": "CMS122-v10.json",
+  "remarks": [
+    "Module based on CMS122v10 - Hemoglobin A1c Poor Control (>9%)"
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "name": "Initial",
+      "direct_transition": "IPP_Age_Guard"
+    },
+    "Terminal": {
+      "type": "Terminal",
+      "name": "Terminal"
+    },
+    "IPP_Age_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "And",
+        "conditions": [
+          {
+            "condition_type": "Age",
+            "operator": ">=",
+            "quantity": 18,
+            "unit": "years",
+            "value": 0
+          },
+          {
+            "condition_type": "Age",
+            "operator": "<=",
+            "quantity": 75,
+            "unit": "years",
+            "value": 0
+          }
+        ]
+      },
+      "direct_transition": "Measurement_Period_Guard",
+      "name": "IPP_Age_Guard"
+    },
+    "Measurement_Period_Guard": {
+      "type": "Guard",
+      "remarks": [
+        "Enforce measurement period"
+      ],
+      "allow": {
+        "condition_type": "Date",
+        "operator": ">=",
+        "year": 2019
+      },
+      "distributed_transition": [
+        {
+          "transition": "Diagnose_Diabetes",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ],
+      "name": "Measurement_Period_Guard"
+    },
+    "Diagnose_Diabetes": {
+      "type": "ConditionOnset",
+      "condition_type": "Active Condition",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "44054006",
+          "display": "Diabetes Type 2",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": "46635009",
+          "display": "Diabetes Type 1",
+          "value_set": ""
+        }
+      ],
+      "name": "Diagnose_Diabetes",
+      "direct_transition": "Set_Has_Diabetes"
+    },
+    "IPP_Qualifying_Encounter": {
+      "type": "Encounter",
+      "telemedicine_possibility": "none",
+      "name": "IPP_Qualifying_Encounter",
+      "codes": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "185464004",
+          "display": "Out of hours visit - not night visit (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "444971000124105",
+          "display": "Annual wellness visit (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99397",
+          "display": "Preventive Care Services - Established Office Visit, 18 and Up",
+          "value_set": ""
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99387",
+          "display": "Preventive Care Services-Initial Office Visit, 18 and Up",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "704126008",
+          "display": "Home visit for anticoagulant drug monitoring (procedure)",
+          "value_set": ""
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "386472008",
+          "display": "Telephone consultation (procedure)",
+          "value_set": ""
+        }
+      ],
+      "encounter_class": "inpatient",
+      "direct_transition": "Set_Encounter_Occurred"
+    },
+    "Record_HbA1c": {
+      "type": "Observation",
+      "vital_sign": "Blood Glucose",
+      "category": "laboratory",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+          "value_set": ""
+        },
+        {
+          "system": "LOINC",
+          "code": "17856-6",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC",
+          "value_set": ""
+        },
+        {
+          "system": "LOINC",
+          "code": "4549-2",
+          "display": "Hemoglobin A1c/Hemoglobin.total in Blood by Electrophoresis",
+          "value_set": ""
+        }
+      ],
+      "unit": "%",
+      "name": "Record_HbA1c",
+      "direct_transition": "Check_Population"
+    },
+    "Set_HbA1c_Not_Performed": {
+      "type": "SetAttribute",
+      "attribute": "HbA1c_not_performed",
+      "direct_transition": "Check_Population",
+      "name": "Set_HbA1c_Not_Performed",
+      "value": true
+    },
+    "Set_Numerator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_numerator",
+      "direct_transition": "Set_Denominator",
+      "value": true,
+      "name": "Set_Numerator"
+    },
+    "Set_Denominator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_denominator",
+      "direct_transition": "Set_IPP",
+      "value": true,
+      "name": "Set_Denominator"
+    },
+    "Set_IPP": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_ipp",
+      "direct_transition": "Terminal",
+      "value": true,
+      "name": "Set_IPP"
+    },
+    "Check_Population": {
+      "type": "Simple",
+      "name": "Check_Population",
+      "conditional_transition": [
+        {
+          "transition": "Set_Numerator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "And",
+                "conditions": [
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "has_diabetes",
+                    "operator": "==",
+                    "value": true
+                  },
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "encounter_occurred",
+                    "operator": "==",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "condition_type": "Or",
+                "conditions": [
+                  {
+                    "condition_type": "Vital Sign",
+                    "vital_sign": "Blood Glucose",
+                    "operator": ">=",
+                    "value": 9
+                  },
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "HbA1c_not_performed",
+                    "operator": "==",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Set_Denominator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Attribute",
+                "attribute": "has_diabetes",
+                "operator": "==",
+                "value": true
+              },
+              {
+                "condition_type": "Attribute",
+                "attribute": "encounter_occurred",
+                "operator": "==",
+                "value": true
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Set_Encounter_Occurred": {
+      "type": "SetAttribute",
+      "attribute": "encounter_occurred",
+      "distributed_transition": [
+        {
+          "transition": "Record_HbA1c",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Set_HbA1c_Not_Performed",
+          "distribution": 0.25
+        }
+      ],
+      "name": "Set_Encounter_Occurred",
+      "value": true
+    },
+    "Set_Has_Diabetes": {
+      "type": "SetAttribute",
+      "attribute": "has_diabetes",
+      "distributed_transition": [
+        {
+          "transition": "IPP_Qualifying_Encounter",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ],
+      "name": "Set_Has_Diabetes",
+      "value": true
+    }
+  },
+  "gmf_version": 2
+}
