@@ -1,0 +1,351 @@
+{
+  "name": "CMS165-v9",
+  "remarks": [
+    "Module for CMS165 - Controlling High Blood Pressure"
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "IPP_Age_Guard",
+      "name": "Initial"
+    },
+    "IPP_Age_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "And",
+        "conditions": [
+          {
+            "condition_type": "Age",
+            "operator": ">=",
+            "quantity": 18,
+            "unit": "years",
+            "value": 0
+          },
+          {
+            "condition_type": "Age",
+            "operator": "<=",
+            "quantity": 85,
+            "unit": "years",
+            "value": 0
+          }
+        ]
+      },
+      "direct_transition": "Measurement_Period_Guard",
+      "name": "IPP_Age_Guard"
+    },
+    "Measurement_Period_Guard": {
+      "type": "Guard",
+      "remarks": [
+        "Enforce measurement period"
+      ],
+      "allow": {
+        "condition_type": "Date",
+        "operator": ">=",
+        "year": 2023
+      },
+      "name": "Measurement_Period_Guard",
+      "distributed_transition": [
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        },
+        {
+          "transition": "Diagnose_Hypertension",
+          "distribution": 0.75
+        }
+      ]
+    },
+    "Diagnose_Hypertension": {
+      "type": "ConditionOnset",
+      "condition_type": "Active Condition",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 10725009,
+          "display": "Benign hypertension (disorder)",
+          "value_set": "2.16.840.1.113883.3.464.1003.104.11.1029"
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 1078301000112109,
+          "display": "Multiple drug intolerant hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 1201005,
+          "display": "Benign essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 19769006,
+          "display": "High-renin essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 371125006,
+          "display": "Labile essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 429457004,
+          "display": "Systolic essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 461301000124109,
+          "display": "Resistant hypertensive disorder (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 46481004,
+          "display": "Low-renin essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 48146000,
+          "display": "Diastolic hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 56218007,
+          "display": "Systolic hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 59621000,
+          "display": "Essential hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 59720008,
+          "display": "Sustained diastolic hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 65518004,
+          "display": "Labile diastolic hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 762463000,
+          "display": "Diastolic hypertension co-occurrent with systolic hypertension (disorder)",
+          "value_set": ""
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 78975002,
+          "display": "Malignant essential hypertension (disorder)",
+          "value_set": ""
+        }
+      ],
+      "name": "Diagnose_Hypertension",
+      "direct_transition": "Set_Hypertension_Dx"
+    },
+    "Terminal": {
+      "type": "Terminal",
+      "name": "Terminal"
+    },
+    "Set_Hypertension_Dx": {
+      "type": "SetAttribute",
+      "attribute": "hypertension_dx",
+      "name": "Set_Hypertension_Dx",
+      "value": true,
+      "distributed_transition": [
+        {
+          "transition": "IPP_Qualifying_Encounter",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Check_Population",
+          "distribution": 0.25
+        }
+      ]
+    },
+    "IPP_Qualifying_Encounter": {
+      "type": "Encounter",
+      "telemedicine_possibility": "none",
+      "name": "IPP_Qualifying_Encounter",
+      "codes": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "185464004",
+          "display": "Out of hours visit - not night visit (procedure)",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1001"
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "444971000124105",
+          "display": "Annual wellness visit (procedure)",
+          "value_set": "2.16.840.1.113883.3.526.3.1240"
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99397",
+          "display": "Preventive Care Services - Established Office Visit, 18 and Up",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1025"
+        },
+        {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99387",
+          "display": "Preventive Care Services-Initial Office Visit, 18 and Up",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1023"
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": 439708006,
+          "display": "Home visit (procedure)",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1016"
+        },
+        {
+          "system": "http://snomed.info/sct",
+          "code": "386472008",
+          "display": "Telephone consultation (procedure)",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1080"
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": 98969,
+          "display": "Online assessment and management service provided by a qualified nonphysician health care professional to an established patient or guardian",
+          "value_set": "2.16.840.1.113883.3.464.1003.101.12.1089"
+        }
+      ],
+      "encounter_class": "inpatient",
+      "direct_transition": "Set_Encounter_Occurred"
+    },
+    "Set_Encounter_Occurred": {
+      "type": "SetAttribute",
+      "attribute": "encounter_occurred",
+      "direct_transition": "Record_BP",
+      "name": "Set_Encounter_Occurred",
+      "value": true
+    },
+    "Record_BP": {
+      "type": "MultiObservation",
+      "category": "vital-signs",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "85354-9",
+          "display": "Blood Pressure",
+          "value_set": ""
+        }
+      ],
+      "observations": [
+        {
+          "category": "vital-signs",
+          "codes": [
+            {
+              "system": "LOINC",
+              "code": "8480-6",
+              "display": "Systolic Blood Pressure"
+            }
+          ],
+          "unit": "mm[Hg]",
+          "vital_sign": "Systolic Blood Pressure"
+        },
+        {
+          "category": "vital-signs",
+          "codes": [
+            {
+              "system": "LOINC",
+              "code": "8462-4",
+              "display": "Diastolic Blood Pressure"
+            }
+          ],
+          "unit": "mm[Hg]",
+          "vital_sign": "Diastolic Blood Pressure"
+        }
+      ],
+      "direct_transition": "End_Hypertension_Encounter",
+      "name": "Record_BP"
+    },
+    "End_Hypertension_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Check_Population",
+      "name": "End_Hypertension_Encounter"
+    },
+    "Check_Population": {
+      "type": "Simple",
+      "name": "Check_Population",
+      "conditional_transition": [
+        {
+          "transition": "Set_Numerator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Vital Sign",
+                "vital_sign": "Systolic Blood Pressure",
+                "operator": "<",
+                "value": 140
+              },
+              {
+                "condition_type": "Vital Sign",
+                "vital_sign": "Diastolic Blood Pressure",
+                "operator": "<",
+                "value": 90
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Set_Denominator",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Attribute",
+                "attribute": "hypertension_dx",
+                "operator": "==",
+                "value": true
+              },
+              {
+                "condition_type": "Attribute",
+                "attribute": "encounter_occurred",
+                "operator": "==",
+                "value": true
+              }
+            ]
+          }
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Set_Numerator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_numerator",
+      "direct_transition": "Set_Denominator",
+      "value": true,
+      "name": "Set_Numerator"
+    },
+    "Set_Denominator": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_denominator",
+      "direct_transition": "Set_IPP",
+      "value": true,
+      "name": "Set_Denominator"
+    },
+    "Set_IPP": {
+      "type": "SetAttribute",
+      "attribute": "ecqm_ipp",
+      "direct_transition": "Terminal",
+      "value": true,
+      "name": "Set_IPP"
+    }
+  },
+  "gmf_version": 2
+}
