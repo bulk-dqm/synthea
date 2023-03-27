@@ -47,11 +47,11 @@
       "distributed_transition": [
         {
           "transition": "Check_Population",
-          "distribution": 0.25
+          "distribution": 0.75
         },
         {
           "transition": "Diagnose_Hypertension",
-          "distribution": 0.75
+          "distribution": 0.25
         }
       ]
     },
@@ -165,11 +165,11 @@
       "distributed_transition": [
         {
           "transition": "IPP_Qualifying_Encounter",
-          "distribution": 0.75
+          "distribution": 0.25
         },
         {
           "transition": "Check_Population",
-          "distribution": 0.25
+          "distribution": 0.75
         }
       ]
     },
@@ -286,16 +286,38 @@
             "condition_type": "And",
             "conditions": [
               {
-                "condition_type": "Vital Sign",
-                "vital_sign": "Systolic Blood Pressure",
-                "operator": "<",
-                "value": 140
+                "condition_type": "And",
+                "conditions": [
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "encounter_occurred",
+                    "operator": "==",
+                    "value": true
+                  },
+                  {
+                    "condition_type": "Attribute",
+                    "attribute": "hypertension_dx",
+                    "operator": "==",
+                    "value": true
+                  }
+                ]
               },
               {
-                "condition_type": "Vital Sign",
-                "vital_sign": "Diastolic Blood Pressure",
-                "operator": "<",
-                "value": 90
+                "condition_type": "And",
+                "conditions": [
+                  {
+                    "condition_type": "Vital Sign",
+                    "vital_sign": "Systolic Blood Pressure",
+                    "operator": "<",
+                    "value": 140
+                  },
+                  {
+                    "condition_type": "Vital Sign",
+                    "vital_sign": "Diastolic Blood Pressure",
+                    "operator": "<",
+                    "value": 90
+                  }
+                ]
               }
             ]
           }
